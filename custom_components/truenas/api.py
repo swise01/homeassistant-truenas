@@ -121,11 +121,7 @@ class TrueNASAPI(object):
                 errorcode,
             )
 
-            if (
-                errorcode != 500
-                and service != "reporting/get_data"
-                and service != "reporting/netdata_get_data"
-            ):
+            if errorcode in (401, 403, "no_response"):
                 self._connected = False
 
             self._error = errorcode

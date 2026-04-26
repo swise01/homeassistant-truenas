@@ -960,7 +960,7 @@ class TrueNASCoordinator(DataUpdateCoordinator[None]):
         temps = self.api.query(
             "disk/temperatures",
             method="post",
-            params={"names": []},
+            params={},
         )
 
         if temps:
