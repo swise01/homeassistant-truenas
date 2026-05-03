@@ -276,61 +276,29 @@ class TrueNASCoordinator(DataUpdateCoordinator[None]):
     # ---------------------------
     def get_updatecheck(self) -> None:
         update_status = self.api.query("update.status")
+        new_version = None
         if isinstance(update_status, dict):
             status_detail = update_status.get("status", update_status)
             if isinstance(status_detail, dict) and isinstance(
                 status_detail.get("status"), dict
             ):
                 status_detail = status_detail["status"]
-
-            new_version = None
             if isinstance(status_detail, dict):
                 new_version = status_detail.get("new_version")
-            if isinstance(new_version, dict):
-                version_value = new_version.get("version")
-            else:
-                version_value = None
 
+        if isinstance(new_version, dict):
+            version_value = new_version.get("version")
             if version_value:
                 self.ds["system_info"]["update_status"] = "AVAILABLE"
                 self.ds["system_info"]["update_version"] = version_value
                 self.ds["system_info"]["update_available"] = True
-            else:
-                self.ds["system_info"]["update_status"] = "RECHECK_UPDATE"
-                self.ds["system_info"]["update_available"] = False
-                if self.ds["system_info"].get("version"):
-                    self.ds["system_info"]["update_version"] = self.ds["system_info"]["version"]
-            return
+                return
 
-        self.ds["system_info"] = parse_api(
-            data=self.ds["system_info"],
-            source=self.api.query("update.check_available"),
-            vals=[
-                {
-                    "name": "update_status",
-                    "source": "status",
-                    "default": "unknown",
-                },
-                {
-                    "name": "update_version",
-                    "source": "version",
-                    "default": "unknown",
-                },
-            ],
-        )
-
-        if not self.api.connected():
-            return
-
-        if (
-            self.ds["system_info"]["update_version"] == "unknown"
-            and self.ds["system_info"]["version"]
-        ):
+        # No update available (or update.status unavailable) — mark up to date
+        self.ds["system_info"]["update_status"] = "RECHECK_UPDATE"
+        self.ds["system_info"]["update_available"] = False
+        if self.ds["system_info"].get("version"):
             self.ds["system_info"]["update_version"] = self.ds["system_info"]["version"]
-
-        self.ds["system_info"]["update_available"] = (
-            self.ds["system_info"]["update_status"] == "AVAILABLE"
-        )
 
     # ---------------------------
     #   get_systemstats
