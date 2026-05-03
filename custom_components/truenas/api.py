@@ -208,9 +208,11 @@ class TrueNASAPI(object):
                     else:
                         self._error = "malformed_result"
 
-                    if (type(data) is list or type(data) is dict) and "error" in data:
+                    if (type(data) is list or type(data) is dict) and "error" in data and data["error"] is not None:
                         if (
-                            "data" in data["error"]
+                            isinstance(data["error"], dict)
+                            and "data" in data["error"]
+                            and isinstance(data["error"]["data"], dict)
                             and "reason" in data["error"]["data"]
                         ):
                             _LOGGER.error(
@@ -219,12 +221,12 @@ class TrueNASAPI(object):
                                 service,
                                 data["error"]["data"]["reason"],
                             )
-                        else:
+                        elif isinstance(data["error"], dict):
                             _LOGGER.error(
                                 "TrueNAS %s query (%s) error: %s",
                                 self._host,
                                 service,
-                                data["error"]["message"],
+                                data["error"].get("message", data["error"]),
                             )
                 else:
                     data = message
