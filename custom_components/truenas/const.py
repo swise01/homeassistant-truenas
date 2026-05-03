@@ -9,8 +9,6 @@ PLATFORMS = [
     Platform.SENSOR,
     Platform.BINARY_SENSOR,
     Platform.UPDATE,
-    Platform.BUTTON,
-    Platform.SWITCH,
 ]
 
 DOMAIN = "truenas"

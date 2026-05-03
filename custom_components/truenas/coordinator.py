@@ -295,7 +295,12 @@ class TrueNASCoordinator(DataUpdateCoordinator[None]):
                 self.ds["system_info"]["update_status"] = "AVAILABLE"
                 self.ds["system_info"]["update_version"] = version_value
                 self.ds["system_info"]["update_available"] = True
-                return
+            else:
+                self.ds["system_info"]["update_status"] = "RECHECK_UPDATE"
+                self.ds["system_info"]["update_available"] = False
+                if self.ds["system_info"].get("version"):
+                    self.ds["system_info"]["update_version"] = self.ds["system_info"]["version"]
+            return
 
         self.ds["system_info"] = parse_api(
             data=self.ds["system_info"],
