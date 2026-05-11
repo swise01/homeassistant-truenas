@@ -14,6 +14,9 @@ from homeassistant.core import HomeAssistant
 _LOGGER = getLogger(__name__)
 disable_warnings(InsecureRequestWarning)
 
+NO_RESPONSE_ERROR = "no_response"
+CONNECTION_FATAL_ERRORS = {401, 403, NO_RESPONSE_ERROR}
+
 
 # ---------------------------
 #   TrueNASAPI
@@ -112,7 +115,7 @@ class TrueNASAPI(object):
             try:
                 errorcode = response.status_code
             except Exception:
-                errorcode = "no_response"
+                errorcode = NO_RESPONSE_ERROR
 
             _LOGGER.warning(
                 'TrueNAS %s unable to fetch data "%s" (%s)',
@@ -121,7 +124,7 @@ class TrueNASAPI(object):
                 errorcode,
             )
 
-            if errorcode in (401, 403, "no_response"):
+            if errorcode in CONNECTION_FATAL_ERRORS:
                 self._connected = False
 
             self._error = errorcode
